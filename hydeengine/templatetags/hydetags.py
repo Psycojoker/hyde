@@ -1,6 +1,5 @@
 from datetime import datetime
 import operator
-import os
 import re
 import string
 
@@ -11,7 +10,6 @@ from django.template.loader import render_to_string
 from django.template.defaultfilters import truncatewords_html, stringfilter
 from django.template.loader_tags import do_include
 from django.template import Library
-from django.utils.safestring import mark_safe
 
 from hydeengine.file_system import File, Folder
 

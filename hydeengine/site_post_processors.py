@@ -1,9 +1,7 @@
 from __future__ import with_statement
-import os, re,  string, subprocess, codecs
+import os, re, codecs
 from django.conf import settings
-from django.template.loader import render_to_string
 from file_system import File
-from datetime import datetime
 from hydeengine.templatetags.hydetags import xmldatetime
 import commands
 
