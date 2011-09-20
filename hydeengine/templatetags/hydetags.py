@@ -439,3 +439,16 @@ def render(parser, token):
     else:
         data = template.Variable(bits[3])
     return RenderNode(template_path, node_list=nodelist, data=data)
+
+@register.filter
+def sort_menu(sections):
+    ordre = {
+        "blog": 0,
+        "dump": 1,
+        "projects": 2,
+        "about": 99
+    }
+    def trie(a, b):
+        a, b = ordre.get(a.name, 50), ordre.get(b.name, 50)
+        return a - b
+    return sorted(sections, cmp=trie)
