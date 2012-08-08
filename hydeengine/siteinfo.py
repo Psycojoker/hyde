@@ -66,6 +66,7 @@ class Page(SiteResource):
         self.exclude = False
         self.display_in_list = None
         self.module = node.module
+        self.section = node.parent.name
         self.created = datetime.strptime("2000-01-01", "%Y-%m-%d")
         self.updated = None
         self.process()
