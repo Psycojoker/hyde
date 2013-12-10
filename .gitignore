@@ -8,3 +8,5 @@ deploy/*
 pylint*
 *.tmproj
 test_site
+ve
+hyde.egg-info
