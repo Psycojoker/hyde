@@ -50,8 +50,8 @@ class Markdown2Node(template.Node):
             import markdown2
         except ImportError:
             print u"Template uses markdown2 tag but markdown2 library not found."
-            raise                                                               
-            
+            raise
+
         md = markdown2.Markdown()
         return md.convert(output)
 
@@ -180,7 +180,7 @@ class SyntaxHighlightNode(template.Node):
         except ImportError:
             print u"Requires Pygments library to use syntax highlighting tags."
             raise
-        
+
         output = self.nodelist.render(context)
         lexer = self.get_lexer(output)
         pygments_options = dict()
@@ -191,11 +191,11 @@ class SyntaxHighlightNode(template.Node):
         if context.get('in_markdown', False):
             h = self.preprocess_for_markdown(h)
         return safestring.mark_safe(h)
-    
+
     def preprocess_for_markdown(self, code):
         code = code.replace('\n\n', '\n&nbsp;\n').replace('\n', '<br />')
         return '\n\n<div class="code">%s</div>\n\n' % code
-        
+
     def get_lexer(self, value):
         if self.lexer is None:
             return self.lexers.guess_lexer(value)
@@ -223,8 +223,8 @@ class BibtexNode(template.Node):
         biblio =  parse_string(output)
         context["page"].bibliography=biblio
         context["page"].bibitex=output
-            
-        return "" 
+
+        return ""
 
 
 
@@ -240,9 +240,9 @@ class NewlineLessNode(Node):
 def newlineless(parser, token):
     nodelist = parser.parse(('endnewlineless',))
     parser.delete_first_token()
-    return NewlineLessNode(nodelist)        
+    return NewlineLessNode(nodelist)
 
-    
+
 @register.filter
 def md5_querystring(value, arg=None):
     '''filter that appends a path with an md5 querystring'''
@@ -253,4 +253,4 @@ def md5_querystring(value, arg=None):
         return value
 
     m = hashlib.md5(f.read()).hexdigest()
-    return "%s?%s" % (value, m)        
+    return "%s?%s" % (value, m)
