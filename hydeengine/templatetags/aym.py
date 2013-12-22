@@ -15,11 +15,13 @@ import hashlib
 
 register = template.Library()
 
+
 @register.tag(name="textile")
 def textileParser(parser, token):
     nodelist = parser.parse(('endtextile',))
     parser.delete_first_token()
     return TextileNode(nodelist)
+
 
 class TextileNode(template.Node):
     def __init__(self, nodelist):
@@ -34,11 +36,13 @@ class TextileNode(template.Node):
             raise
         return textile.textile(output)
 
+
 @register.tag(name="markdown2")
 def markdown2Parser(parser, token):
     nodelist = parser.parse(('endmarkdown2',))
     parser.delete_first_token()
     return Markdown2Node(nodelist)
+
 
 class Markdown2Node(template.Node):
     def __init__(self, nodelist):
@@ -55,6 +59,7 @@ class Markdown2Node(template.Node):
         md = markdown2.Markdown()
         return md.convert(output)
 
+
 @register.tag(name="markdown")
 def markdownParser(parser, token):
     token_list = token.split_contents()
@@ -63,6 +68,7 @@ def markdownParser(parser, token):
     nodelist = parser.parse(('endmarkdown',))
     parser.delete_first_token()
     return MarkdownNode(nodelist, extensions)
+
 
 class MarkdownNode(template.Node):
     def __init__(self, nodelist, extensions):
@@ -75,24 +81,26 @@ class MarkdownNode(template.Node):
         output = self.nodelist.render(context)
         context.pop()
         extensions = self.extensions
-        if hasattr(settings,'MD_EXTENSIONS'):
+        if hasattr(settings, 'MD_EXTENSIONS'):
             extensions = extensions + settings.MD_EXTENSIONS
         extensions_config = {}
-        if hasattr(settings,'MD_EXTENSIONS_CONFIG'):
+        if hasattr(settings, 'MD_EXTENSIONS_CONFIG'):
             extensions_config = settings.MD_EXTENSIONS_CONFIG
         try:
             import markdown
         except ImportError:
             print u"Requires Markdown library to use Markdown tag."
             raise
-        md = markdown.Markdown(extensions=extensions,extension_configs=extensions_config)
+        md = markdown.Markdown(extensions=extensions, extension_configs=extensions_config)
         return md.convert(output)
+
 
 @register.tag(name="H")
 def stylize(parser, token):
     nodelist = parser.parse(('endH',))
     parser.delete_first_token()
     return StylizeNode(nodelist, *token.contents.split()[1:])
+
 
 class StylizeNode(Node):
     def __init__(self, nodelist, *varlist):
@@ -105,11 +113,13 @@ class StylizeNode(Node):
         return highlight(self.nodelist.render(context),
                 get_lexer_by_name(style, encoding='UTF-8'), HtmlFormatter())
 
+
 @register.tag(name="restructuredtext")
 def restructuredtextParser(parser, token):
     nodelist = parser.parse(('endrestructuredtext',))
     parser.delete_first_token()
     return RestructuredTextNode(nodelist)
+
 
 class RestructuredTextNode(template.Node):
     def __init__(self, nodelist):
@@ -135,6 +145,7 @@ def asciidocParser(parser, token):
     nodelist = parser.parse(('endasciidoc',))
     parser.delete_first_token()
     return asciidocNode(nodelist)
+
 
 class asciidocNode(template.Node):
     def __init__(self, nodelist):
@@ -164,7 +175,8 @@ def syntaxHighlightParser(parser, token):
 
     nodelist = parser.parse(('endsyntax',))
     parser.delete_first_token()
-    return SyntaxHighlightNode(nodelist,lexer)
+    return SyntaxHighlightNode(nodelist, lexer)
+
 
 class SyntaxHighlightNode(template.Node):
     def __init__(self, nodelist, lexer):
@@ -208,6 +220,7 @@ def bibtexParser(parser, token):
     parser.delete_first_token()
     return BibtexNode(nodelist)
 
+
 class BibtexNode(template.Node):
     def __init__(self, nodelist):
         self.nodelist = nodelist
@@ -220,13 +233,11 @@ class BibtexNode(template.Node):
         except ImportError:
             print u"Requires zs.bibtex library to use bibtex tag."
             raise
-        biblio =  parse_string(output)
-        context["page"].bibliography=biblio
-        context["page"].bibitex=output
+        biblio = parse_string(output)
+        context["page"].bibliography = biblio
+        context["page"].bibitex = output
 
         return ""
-
-
 
 
 class NewlineLessNode(Node):
@@ -235,6 +246,7 @@ class NewlineLessNode(Node):
 
     def render(self, context):
         return re.sub('\s{2,}', ' ', normalize_newlines(self.nodelist.render(context)).replace('\n', ''))
+
 
 @register.tag(name="newlineless")
 def newlineless(parser, token):
