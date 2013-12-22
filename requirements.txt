@@ -3,3 +3,4 @@ pyYAML
 markdown
 cssmin
 django_pdb
+pygments

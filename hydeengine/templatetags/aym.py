@@ -1,8 +1,14 @@
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import HtmlFormatter
+
 from django import template
 from django.conf import settings
 from django.utils import safestring
 from django.template import Node
 from django.utils.text import normalize_newlines
+from django.template import Library, resolve_variable
+
 import cStringIO as StringIO
 import re
 import hashlib
@@ -78,10 +84,26 @@ class MarkdownNode(template.Node):
             import markdown
         except ImportError:
             print u"Requires Markdown library to use Markdown tag."
-            raise            
+            raise
         md = markdown.Markdown(extensions=extensions,extension_configs=extensions_config)
         return md.convert(output)
 
+@register.tag(name="H")
+def stylize(parser, token):
+    nodelist = parser.parse(('endH',))
+    parser.delete_first_token()
+    return StylizeNode(nodelist, *token.contents.split()[1:])
+
+class StylizeNode(Node):
+    def __init__(self, nodelist, *varlist):
+        self.nodelist, self.vlist = (nodelist, varlist)
+
+    def render(self, context):
+        style = 'text'
+        if len(self.vlist) > 0:
+            style = resolve_variable(self.vlist[0], context)
+        return highlight(self.nodelist.render(context),
+                get_lexer_by_name(style, encoding='UTF-8'), HtmlFormatter())
 
 @register.tag(name="restructuredtext")
 def restructuredtextParser(parser, token):
