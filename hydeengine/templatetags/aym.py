@@ -95,6 +95,7 @@ class MarkdownNode(template.Node):
         return md.convert(output)
 
 
+# adapted from https://djangosnippets.org/snippets/350/
 @register.tag(name="H")
 def stylize(parser, token):
     nodelist = parser.parse(('endH',))
