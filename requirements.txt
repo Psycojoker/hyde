@@ -4,3 +4,4 @@ markdown
 cssmin
 django_pdb
 pygments
+cherrypy
