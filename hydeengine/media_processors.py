@@ -1,5 +1,4 @@
 import os
-import re
 import sys
 import urllib
 import urllib2
@@ -7,6 +6,7 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from file_system import File
 from subprocess import check_call, CalledProcessError
+
 
 class TemplateProcessor:
     @staticmethod
@@ -16,8 +16,8 @@ class TemplateProcessor:
             resource.source_file.write(rendered)
         except:
             print >> sys.stderr, \
-            "***********************\nError while rendering page %s\n***********************" % \
-            resource.url
+                "***********************\nError while rendering page %s\n***********************" % \
+                resource.url
             raise
 
 
@@ -31,6 +31,7 @@ class CleverCSS:
         out_file = File(resource.source_file.path_without_extension + ".css")
         out_file.write(out)
         resource.source_file.delete()
+
 
 class HSS:
     @staticmethod
@@ -48,6 +49,7 @@ class HSS:
         out_file.copy_to(resource.source_file.path)
         out_file.delete()
 
+
 class SASS:
     @staticmethod
     def process(resource):
@@ -64,6 +66,7 @@ class SASS:
             return None
         resource.source_file.delete()
         resource.source_file = out_file
+
 
 class LessCSS:
     @staticmethod
@@ -93,6 +96,7 @@ class LessCSS:
         if not out_file.exists:
             print 'Error Occurred when processing with Less'
 
+
 class Stylus:
     @staticmethod
     def process(resource):
@@ -109,6 +113,7 @@ class Stylus:
         else:
             resource.source_file.delete()
             resource.source_file = out_file
+
 
 class CSSPrefixer:
     @staticmethod
@@ -130,6 +135,7 @@ class CSSPrefixer:
                 return False
         resource.source_file.write(out)
 
+
 class CSSmin:
     @staticmethod
     def process(resource):
@@ -137,6 +143,7 @@ class CSSmin:
         data = resource.source_file.read_all()
         out = cssmin.cssmin(data)
         resource.source_file.write(out)
+
 
 class CoffeeScript:
     @staticmethod
@@ -156,6 +163,7 @@ class CoffeeScript:
             resource.source_file.delete()
             resource.source_file = out_file
 
+
 class JSmin:
     @staticmethod
     def process(resource):
@@ -163,6 +171,7 @@ class JSmin:
         data = resource.source_file.read_all()
         out = jsmin.jsmin(data)
         resource.source_file.write(out)
+
 
 class UglifyJS:
     @staticmethod
@@ -172,7 +181,7 @@ class UglifyJS:
             compress = settings.UGLIFYJS
             if not os.path.exists(compress):
                 compress = os.path.join(
-                        os.path.dirname(
+                    os.path.dirname(
                         os.path.abspath(__file__)), "..", compress)
 
             try:
@@ -196,6 +205,7 @@ class UglifyJS:
         resource.source_file.delete()
         tmp_file.move_to(resource.source_file.path)
 
+
 class YUICompressor:
     @staticmethod
     def process(resource):
@@ -204,12 +214,12 @@ class YUICompressor:
         compress = settings.YUI_COMPRESSOR
         if not os.path.exists(compress):
             compress = os.path.join(
-                    os.path.dirname(
+                os.path.dirname(
                     os.path.abspath(__file__)), "..", compress)
 
         if not compress or not os.path.exists(compress):
             raise ValueError(
-            "YUI Compressor cannot be found at [%s]" % compress)
+                "YUI Compressor cannot be found at [%s]" % compress)
 
         tmp_file = File(resource.source_file.path + ".z-tmp")
         try:
@@ -222,6 +232,7 @@ class YUICompressor:
             resource.source_file.delete()
             tmp_file.move_to(resource.source_file.path)
 
+
 class ClosureCompiler:
     @staticmethod
     def process(resource):
@@ -230,11 +241,11 @@ class ClosureCompiler:
             compress = settings.CLOSURE_COMPILER
             if not os.path.exists(compress):
                 compress = os.path.join(
-                        os.path.dirname(
+                    os.path.dirname(
                         os.path.abspath(__file__)), "..", compress)
             if not compress or not os.path.exists(compress):
                 raise ValueError(
-                "Closure Compiler cannot be found at [%s]" % compress)
+                    "Closure Compiler cannot be found at [%s]" % compress)
 
             try:
                 check_call(["java", "-jar", compress, "--js",
@@ -261,6 +272,7 @@ class ClosureCompiler:
         resource.source_file.delete()
         tmp_file.move_to(resource.source_file.path)
 
+
 class Thumbnail:
     @staticmethod
     def process(resource):
@@ -282,6 +294,6 @@ class Thumbnail:
         thumb_path = "%s%s.%s" % (orig_path, postfix, orig_extension)
 
         if i.format == "JPEG" and "THUMBNAIL_JPEG_QUALITY" in dir(settings):
-            i.save(thumb_path, quality = settings.THUMBNAIL_JPEG_QUALITY, optimize = True)
+            i.save(thumb_path, quality=settings.THUMBNAIL_JPEG_QUALITY, optimize=True)
         else:
             i.save(thumb_path)

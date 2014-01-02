@@ -11,22 +11,22 @@ def load_processor(name):
 
 class Processor(object):
     def __init__(self, settings):
-        self.settings = settings 
+        self.settings = settings
         self.processor_cache = {}
         self._logger = None
-        
+
     @property
     def logger(self):
         if self._logger:
             return self._logger
-            
+
         if hasattr(self.settings, "logger"):
             return self.settings.logger
-            
-        loglevel = logging.INFO    
+
+        loglevel = logging.INFO
         if hasattr(self.settings, "LOG_LEVEL"):
             loglevel = self.settings.LOG_LEVEL
-            
+
         logger = logging.getLogger("hyde_processor")
         logger.setLevel(loglevel)
         ch = logging.StreamHandler()
@@ -36,11 +36,11 @@ class Processor(object):
         logger.addHandler(ch)
         self._logger = logger
         return logger
-        
+
     def get_node_processors(self, node):
         if node.fragment in self.processor_cache:
             return self.processor_cache[node.fragment]
-        
+
         processors = {}
         if node.type == "media":
             processors = self.settings.MEDIA_PROCESSORS
@@ -50,13 +50,13 @@ class Processor(object):
             return []
         return self.extract_processors(node, processors, self.processor_cache)
 
-        
+
     def extract_processors(self, node, processors, cache):
         current_processors = []
         this_node = node
         while this_node:
-            fragment = this_node.fragment          
-            self.logger.debug("Getting processors for: %s" % fragment) 
+            fragment = this_node.fragment
+            self.logger.debug("Getting processors for: %s" % fragment)
             if fragment in processors:
                 current_processors.append(processors[fragment])
             this_node = this_node.parent
@@ -76,7 +76,7 @@ class Processor(object):
             self.logger.info("Removing Resource %s" % item.url)
             item.target_file.delete()
             item.temp_file.delete()
-        
+
     def process(self, resource):
         if (resource.node.type not in ("content", "media") or
             resource.is_layout):
@@ -89,33 +89,33 @@ class Processor(object):
             if resource.file.extension in processer_map:
                 processors.extend(processer_map[resource.file.extension])
             else:
-                self.logger.debug("Extension %s" % resource.file.extension)                    
+                self.logger.debug("Extension %s" % resource.file.extension)
                 #
-                # Wildcard matching: 
+                # Wildcard matching:
                 # This should be the default matcher going forward
                 # The above branch needs to be kept around until everyone
                 # has had the chance to upgrade their settings file.
                 #
                 for wildcard, processor_list in processer_map.iteritems():
-                    self.logger.debug(wildcard)                    
+                    self.logger.debug(wildcard)
                     if fnmatch.fnmatch(resource.file.name, wildcard):
-                        processors.extend(processor_list)                        
-                    
-        resource.temp_file.parent.make()        
-        resource.source_file.copy_to(resource.temp_file)  
+                        processors.extend(processor_list)
+
+        resource.temp_file.parent.make()
+        resource.source_file.copy_to(resource.temp_file)
         (original_source, resource.source_file) = (
                                resource.source_file, resource.temp_file)
         for processor_name in processors:
             processor = load_processor(processor_name)
             self.logger.debug("       Executing %s" % processor_name)
             processor.process(resource)
-        
+
         if resource.node.type == "content" and not resource.prerendered:
             self.settings.CONTEXT['page'] = resource
             self.logger.debug("       Rendering Page")
             TemplateProcessor.process(resource)
             self.settings.CONTEXT['page'] = None
-            
+
         resource.source_file = original_source
         self.logger.debug("        Processing Complete")
         return True
@@ -123,11 +123,11 @@ class Processor(object):
     def pre_process(self, node):
         self.logger.info("Pre processing %s" % str(node.folder))
         self.__around_process__(node, self.settings.SITE_PRE_PROCESSORS)
-          
+
     def post_process(self, node):
         self.logger.info("Post processing %s" % str(node.folder))
         self.__around_process__(node, self.settings.SITE_POST_PROCESSORS)
-       
+
     def __around_process__(self, node, processors):
         for child in node.walk():
             if not child.type in ("content", "media"):
@@ -142,11 +142,11 @@ class Processor(object):
                     fragment = "\\"
                 else:
                     fragment = "/"
-            if fragment in processors:           
+            if fragment in processors:
                 processor_config = processors[fragment]
                 for processor_name, params in processor_config.iteritems():
                     self.logger.debug("           Executing %s" % processor_name)
-                    processor = load_processor(processor_name) 
+                    processor = load_processor(processor_name)
                     if not params:
                         params = {}
                     params.update( {'node': child})
